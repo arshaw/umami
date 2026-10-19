@@ -84,10 +84,12 @@ RUN ls node_modules/.pnpm/@prisma+engines@${PRISMA_VERSION}/node_modules/@prisma
     || (echo "ERROR: Prisma engine binaries missing - @prisma/engines postinstall was blocked" && exit 1)
 
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
-COPY --from=builder /app/scripts ./scripts
-COPY --from=builder /app/generated ./generated
+# A shared source checkout may have no world-readable files/directories.
+# Assign runtime files to the image user instead of inheriting root ownership.
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts
+COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
+COPY --from=builder --chown=nextjs:nodejs /app/generated ./generated
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
